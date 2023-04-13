@@ -14,6 +14,7 @@ WINDOW = 501
 POST = "_smoothed"
 AGENTS = PPO_FLUC
 PLOT_LIST = ['balance', 'round', 'r']
+PL = sns.color_palette("colorblind")
 
 fig, axs = plt.subplots(1, len(PLOT_LIST), figsize=(10, 3.33), sharex=True)
 
