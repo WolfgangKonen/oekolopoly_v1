@@ -238,3 +238,5 @@ PPO_FLUC = ["obs_box_action_box_reward_perround_0.5_ppo_17",
             "obs_box_action_box_reward_perround_0.5_ppo_19",
             "obs_box_action_box_reward_perround_0.5_ppo_20",
             "obs_box_action_box_reward_perround_0.5_ppo_21"]
+
+PPO_WK = ["obs_none_action_simple_reward_perround_0.5_ppo_17"]

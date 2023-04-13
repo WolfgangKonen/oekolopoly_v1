@@ -13,7 +13,7 @@ from utils import decode_from_agent_string
 if __name__ == "__main__":
 
     WINDOW = 1000
-    AGENTS = agent_lists.PPO_Fluc
+    AGENTS = agent_lists.PPO_WK
 
     obs_list = []
     action_list = []
