@@ -7,6 +7,7 @@
 - `evaluate.py` evaluates the given list of agents by computing mean and standard deviation of the last evaluation episodes during training. The results are saved in a csv-file specified in the last line of code
 - `train.py` trains an agent with the parameters passed to the script (wrappers, DRL algorithm, parameters for reward-shaping etc.)
 - `utils.py` a few functions for comodity
+- `additional material` contains plots which due to the page limit could not be part of the paper. These include all pie chrts for episodes' termination (see Fig. 6) and fluctuations in the training curves for PPO, SAC, and TD3 algorithms (see Fig. 2).
 
 # How to...
 ## ...train an agent?
