@@ -1,3 +1,5 @@
+This repository contains code for the paper ["Ökolopoly: Case Study on Large Action Spaces in Reinforcement Learning"](https://doi.org/10.1007/978-3-031-53966-4_9) presented in 2023 at the conference "Machine Learning, Optimization, and Data Science" (LOD 2023).
+
 # Description of Directories and Files
 - `oekolopoly` directory:
   - `wrappers.py` contains the wrappers to modify observation- and actionspace as well as reward functions
@@ -7,7 +9,7 @@
 - `evaluate.py` evaluates the given list of agents by computing mean and standard deviation of the last evaluation episodes during training. The results are saved in a csv-file specified in the last line of code
 - `train.py` trains an agent with the parameters passed to the script (wrappers, DRL algorithm, parameters for reward-shaping etc.)
 - `utils.py` a few functions for comodity
-- `additional material` contains plots which due to the page limit could not be part of the paper. These include all pie chrts for episodes' termination (see Fig. 6) and fluctuations in the training curves for PPO, SAC, and TD3 algorithms (see Fig. 2).
+- `additional material` contains plots which due to the page limit could not be part of the paper. These include all pie chrts for episodes' termination (see Fig. 6 in [the publication](#Publication)) and fluctuations in the training curves for PPO, SAC, and TD3 algorithms (see Fig. 2 in [the publication](#Publication)).
 
 # How to...
 ## ...train an agent?
@@ -94,4 +96,32 @@ typing_extensions==4.4.0
 urllib3==1.26.14
 Werkzeug==2.2.2
 zipp==3.11.0
+```
+
+# Publication
+To reference the paper:
+```
+@InProceedings{10.1007/978-3-031-53966-4_9,
+author     = "Engelhardt, Raphael C.
+             and Raycheva, Ralitsa
+             and Lange, Moritz
+             and Wiskott, Laurenz
+             and Konen, Wolfgang",
+editor     = "Nicosia, Giuseppe
+             and Ojha, Varun
+             and La Malfa, Emanuele
+             and La Malfa, Gabriele
+             and Pardalos, Panos M.
+             and Umeton, Renato",
+title      = "{\"O}kolopoly: Case Study on Large Action Spaces in Reinforcement Learning",
+booktitle  = "Machine Learning, Optimization, and Data Science",
+bookseries = "Lecture Notes in Computer Science",
+volume     = "14506",
+year       = "2024",
+publisher  = "Springer Nature Switzerland",
+address    = "Cham",
+pages      = "109--123",
+isbn       = "978-3-031-53966-4",
+doi        = "10.1007/978-3-031-53966-4\_9"
+}
 ```
