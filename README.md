@@ -6,6 +6,7 @@ This repository contains code for the paper ["Ökolopoly: Case Study on Large Ac
   - `oekolopoly` contains the RL environment
   - `oekolopoly_gui` the necessary files to run the GUI for human-play
 - `agent_list.py` lists of agents used for different investigations
+- `trained agents` contains a few trained PPO agents with high performance
 - `evaluate.py` evaluates the given list of agents by computing mean and standard deviation of the last evaluation episodes during training. The results are saved in a csv-file specified in the last line of code
 - `train.py` trains an agent with the parameters passed to the script (wrappers, DRL algorithm, parameters for reward-shaping etc.)
 - `utils.py` a few functions for comodity
