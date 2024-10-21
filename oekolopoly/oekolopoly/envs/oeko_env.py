@@ -517,6 +517,150 @@ class OekoEnv(gym.Env):
                                             'valid_move': True,
                                             'invalid_move_info': ''}
 
+    def step_w_o_clip(self, action):
+        clipping = False
+
+        assert self.action_space.contains(action), f"Action not in action_space: {action}"
+
+        # Transform action space
+        action = action + self.Amin
+        self.prev_action = self.curr_action
+        self.curr_action = action.copy()
+
+        # Init
+        self.done = False
+        used_points = 0
+
+        # Sum points from action
+        used_points += action[self.SANITATION]
+        used_points += abs(action[self.PRODUCTION])
+        used_points += action[self.EDUCATION]
+        used_points += action[self.QUALITY_OF_LIFE]
+        used_points += action[self.POPULATION_GROWTH]
+
+        if used_points < 0 or used_points > self.V[self.POINTS]:
+            self.done = True
+            if used_points < 0:
+                done_reason = "Tried to use negative amount of actionpoints. "
+            elif used_points > self.V[self.POINTS]:
+                done_reason = "Tried to exceed available amount of actionpoints. "
+            done_reason += f"Tried to use {used_points} action points, but only between 0 and {self.V[self.POINTS]} are available"
+            return self.obs, 0, self.done, {'balance (always)': self.balance_always,
+                                            'balance_numerator (always)': self.balance_numerator_always,
+                                            'balance': self.balance,
+                                            'balance_numerator': self.balance_numerator,
+                                            'round': self.V[self.ROUND],
+                                            'done_reason': done_reason,
+                                            'valid_move': False,
+                                            'invalid_move_info': "Unavailable number of actionpoints were used in this round."}
+        assert 0 <= used_points <= self.V[self.POINTS], f"Action takes too many points: action={action} POINTS={self.V[self.POINTS]})"
+
+        for i in range(5):
+            if self.V[i] + action[i] not in range(self.Vmin[i], self.Vmax[i] + 1):
+                self.done = True
+                if self.V[i] + action[i] < self.Vmin[i]:
+                    done_reason = f"Distribution of actionpoints pushes {self.V_NAMES[i]} below limit. "
+                elif self.V[i] + action[i] > self.Vmax[i]:
+                    done_reason = f"Distribution of actionpoints pushes {self.V_NAMES[i]} above limit. "
+                done_reason += f"Tried to use {self.V[i] + action[i]} action points for {self.V_NAMES[i]}, but only between {self.Vmin[i]} and {self.Vmax[i]} are available"
+                return self.obs, 0, self.done, {'balance (always)': self.balance_always,
+                                                'balance_numerator (always)': self.balance_numerator_always,
+                                                'balance': self.balance,
+                                                'balance_numerator': self.balance_numerator,
+                                                'round': self.V[self.ROUND],
+                                                'done_reason': done_reason,
+                                                'valid_move': False,
+                                                'invalid_move_info': f"Unavailable number of actionpoints assigned to {self.V_NAMES[i]}."}
+            assert (self.V[i] + action[i]) in range(self.Vmin[i], self.Vmax[i] + 1), f"Action puts region out of action[{i}]: action={action} V={self.V}"
+
+        # The turn is valid
+
+        for i in range(5): self.V[i] += action[i]
+
+        # Update boxes and V accordingly
+        self.V, self.done, self.done_info = self.update_values(action)
+
+        # Update points and round
+        self.V[self.POINTS] -= used_points
+        self.V[self.ROUND]  += 1
+
+        # Clip values if not in range
+        if clipping:
+            for i in range(8):
+                if self.V[i] not in range(self.Vmin[i], self.Vmax[i] + 1):
+                    self.V[i] = max(self.Vmin[i], min(self.Vmax[i], self.V[i]))
+                    self.done = True
+
+        if self.V[self.ROUND] == 30:
+            self.done = True
+            self.done_info = 'Maximum number of rounds reached.'
+
+        # Points for next round
+        if self.done:
+            self.V[self.POINTS] = 0
+        else:
+            boxA = gb.get_boxA(self.V[self.POPULATION])
+            boxB = gb.get_boxB(self.V[self.POLITICS])
+            boxC = gb.get_boxC(self.V[self.PRODUCTION])
+            boxV = gb.get_boxV(self.V[self.PRODUCTION])
+            boxD = gb.get_boxD(self.V[self.QUALITY_OF_LIFE])
+
+            self.V[self.POINTS] += boxA * boxV
+            self.V[self.POINTS] += boxB
+            self.V[self.POINTS] += boxC
+            self.V[self.POINTS] += boxD
+
+        if self.V[self.POINTS] < 0:
+            self.V[self.POINTS] = 0
+            self.done = True
+            self.done_info = 'Minimum amount of actionpoints reached.'
+
+        if self.V[self.POINTS] > 36:
+            self.V[self.POINTS] = 36
+            self.done = True
+            self.done_info = 'Maximum number of actionpoints reached.'
+
+        boxD = gb.get_boxD(self.V[self.QUALITY_OF_LIFE])
+        a = float((boxD * 3 + self.V[self.POLITICS]) * 10)
+        b = float(self.V[self.ROUND] + 3)
+        self.balance_numerator_always = int(a)
+        self.balance_always = a / b
+
+
+        # Transform V in obs
+        self.obs = self.V - self.Vmin
+        if clipping:
+            assert self.observation_space.contains(self.obs), f"obs not in observation_space: obs={self.obs}"
+
+        if self.V[self.ROUND] in range(10, 31):
+            self.balance = self.balance_always
+            self.balance_numerator = self.balance_numerator_always
+        else:
+            self.balance = 0
+            self.balance_numerator = 0
+
+        if self.done and self.V[self.ROUND] in range(10, 31):
+            reward = self.balance
+        else:
+            reward = 0
+
+        self.prev_result = self.curr_result
+        self.curr_result = self.V.copy()
+
+        self.last_v    = self.V.copy()
+
+        if self.render_mode == "human":
+            self.render()
+
+        return self.obs, reward, self.done, {'balance (always)': self.balance_always,
+                                            'balance_numerator (always)': self.balance_numerator_always,
+                                            'balance': self.balance,
+                                            'balance_numerator': self.balance_numerator,
+                                            'round': self.V[self.ROUND],
+                                            'done_reason': self.done_info,
+                                            'valid_move': True,
+                                            'invalid_move_info': ''}
+
     def get_initial_v(self):
         return self.init_v.copy()
 

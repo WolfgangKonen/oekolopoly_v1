@@ -462,7 +462,7 @@ class Game:
 
         action[temp_env.PRODUCTION] -= temp_env.Amin[temp_env.PRODUCTION]
         action[5] -= temp_env.Amin[5]
-        _, _, done, info = temp_env.step(action)
+        _, _, done, info = temp_env.step_w_o_clip(action)
         for diagram_index in range(len(self.diagrams)):
             env_index = diagram_index
             if env_index == 8:
