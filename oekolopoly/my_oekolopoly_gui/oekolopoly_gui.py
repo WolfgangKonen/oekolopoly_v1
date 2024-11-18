@@ -544,13 +544,13 @@ class Game:
                     self.done = True
                     games_played = get_number_value_by_name("bin/played_games.txt", "games_played")
                     games_played += 1
-                    with open("bin/played_games.txt", "w") as file:
-                        file.write(f"games_played: {games_played}")
+                    #with open("bin/played_games.txt", "w") as file:
+                    #   file.write(f"games_played: {games_played}")
                     self.console_label.text = f"{info['done_reason']}    Endergebnis: {round(reward)} Punkte"
                     date_now = datetime.datetime.now().strftime("%d/%m/%Y-%H:%M:%S")
                     text = f"Runde: {self.env.V[8]}, Punkte: {round(reward)}, Spiele beendet: {games_played}, Zustaende: {self.env.V}, Abbruchgrund: {info['done_reason']}, Datum: {date_now}, Zuege: {self.all_actions}\n"
-                    with open("bin/game_history.txt", "a") as history:
-                        history.write(text)
+                    #with open("bin/game_history.txt", "a") as history:
+                    #    history.write(text)
             else:
                 self.console_label.text = info['invalid_move_info']
 
@@ -564,8 +564,8 @@ class Game:
         if not self.done and self.all_actions != []:
             date_now = datetime.datetime.now().strftime("%d/%m/%Y-%H:%M:%S")
             text = f"Vorzeitiger Abbruch des Spiels, Runde: {self.env.V[8]}, Zustaende {self.env.V}, Datum: {date_now}, Zuege: {self.all_actions}\n"
-            with open("bin/game_history.txt", "a") as history:
-                history.write(text)
+            #with open("bin/game_history.txt", "a") as history:
+            #    history.write(text)
 
         self.env = gym.make('Oekolopoly-v1')
         self.agent_obs = self.env.reset()
@@ -1058,13 +1058,6 @@ def setup_game(number, id_):
 def main():
     setup_game(random_number, user_id)
 
-    # login for email
-    #sender = smtplib.SMTP("smtp.web.de", 587)
-    #sender.ehlo()
-    #sender.starttls()
-    #sender.ehlo()
-    #sender.login("user", "password")
-
     fps = 60
     pygame.init()
     pygame.display.set_mode()
@@ -1103,29 +1096,34 @@ def main():
         clock.tick(fps)
 
     # prepare and send email
-    pygame.display.quit()
 
     email = ""
     history_text = get_text_from_file("bin/game_history.txt")
     if len(history_text) > 0:
         email += history_text
-        #with open("bin/game_history.txt", "w") as file:
-        #    file.write("")
+        with open("bin/game_history.txt", "w") as file:
+            file.write("")
     feedback_text = get_text_from_file("feedback.txt")
     if len(feedback_text) > 0:
         email += f"\nFeedback\n {feedback_text}"
-        #with open("feedback.txt", "w") as file:
-        #    file.write("")
+        with open("feedback.txt", "w") as file:
+            file.write("")
 
-    #if len(email) > 12:
-        #mail = MIMEText(email)
-        #mail['Subject'] = game.config
-        #mail['From'] = "Me <emailaddress>"
-        #mail['To'] = "emailaddress"
-
-        #sender.send_message(mail)
-
-    #sender.close()
+    # if len(email) > 12:
+    #     # login for email
+    #     sender = smtplib.SMTP("smtp.web.de", 587)
+    #     sender.ehlo()
+    #     sender.starttls()
+    #     sender.ehlo()
+    #     sender.login("user", "password")
+    #
+    #     mail = MIMEText(email)
+    #     mail['Subject'] = game.config
+    #     mail['From'] = "Me <emailaddress>"
+    #     mail['To'] = "emailaddress"
+    #
+    #     sender.send_message(mail)
+    #     sender.close()
 
 
 if __name__ == '__main__':
