@@ -377,6 +377,15 @@ class OekoEnv(gym.Env):
         return self.V, done, done_info
 
     def step(self, action):
+        clipping = True
+        return self.__inner_step(action, clipping)
+
+    def step_w_o_clip(self, action):
+        clipping = False
+        return self.__inner_step(action, clipping)
+
+    def __inner_step(self, action, clipping=True):
+        """ realized as inner class because step(self,action) does not allow extra arguments """
 
         assert self.action_space.contains(action), f"Action not in action_space: {action}"
 
@@ -443,10 +452,11 @@ class OekoEnv(gym.Env):
         self.V[self.ROUND]  += 1
 
         # Clip values if not in range
-        for i in range(8):
-            if self.V[i] not in range(self.Vmin[i], self.Vmax[i] + 1):
-                self.V[i] = max(self.Vmin[i], min(self.Vmax[i], self.V[i]))
-                self.done = True
+        if clipping:
+            for i in range(8):
+                if self.V[i] not in range(self.Vmin[i], self.Vmax[i] + 1):
+                    self.V[i] = max(self.Vmin[i], min(self.Vmax[i], self.V[i]))
+                    self.done = True
 
         if self.V[self.ROUND] == 30:
             self.done = True
@@ -486,7 +496,8 @@ class OekoEnv(gym.Env):
 
         # Transform V in obs
         self.obs = self.V - self.Vmin
-        assert self.observation_space.contains(self.obs), f"obs not in observation_space: obs={self.obs}"
+        if clipping:
+            assert self.observation_space.contains(self.obs), f"obs not in observation_space: obs={self.obs}"
 
         if self.V[self.ROUND] in range(10, 31):
             self.balance = self.balance_always
