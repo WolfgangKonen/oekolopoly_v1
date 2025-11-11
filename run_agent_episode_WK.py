@@ -3,18 +3,14 @@
     and run one episode with this agent
 """
 
-import json
 import argparse
 from pathlib import Path
 import numpy as np
 import gym
 from stable_baselines3 import PPO, SAC, TD3
-from stable_baselines3.common.noise import NormalActionNoise
 from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common.logger import configure
 
-from utils import EvalMonitor
-import oekolopoly.oekolopoly
+import oekolopoly.oekolopoly        # this import is needed, otherwise gym.make will not succeed
 from oekolopoly.wrappers import OekoSimpleObservationWrapper, OekoBoxObservationWrapper, OekoSimpleActionWrapper, OekoBoxActionWrapper, OekoPerRoundRewardWrapper, OekoAuxRewardWrapper, OekoBoxUnclippedActionWrapper
 
 
@@ -99,7 +95,7 @@ def load_model(env, savedir, args):
     :param args:    needed for args.algo (type of SB3 model)
     :return:        the model (trained SB3 agent)
     """
-    agent_file = f"{savedir}/end_of_training_agent.zip"
+    agent_file = f"{savedir}.zip"
     if Path(agent_file).is_file():
         if args.algo == "ppo":
             model = PPO.load(agent_file,
@@ -201,7 +197,7 @@ if __name__ == "__main__":
     args = parse_args()
 
     agent_str = "obs_" + args.observation + "_action_" + args.action + "_reward_" + args.reward + "_" + str(args.shaping) + "_" + args.algo + "_" + str(args.seed)
-    savedir = f"./agents/{agent_str}"
+    savedir = f"./trained agents/{agent_str}"
 
     # Prepare environment
     env = gym.make("Oekolopoly-v1")
@@ -216,7 +212,7 @@ if __name__ == "__main__":
     done = False
     while not done:
         action, _ = model.predict(s, deterministic=True)
-        if args.action=="box":
+        if args.action == "box":
             points = transf_act_box(env, action)     # the points as they are distributed to the wheels
             print(s, points)
         elif args.action == "simple":
